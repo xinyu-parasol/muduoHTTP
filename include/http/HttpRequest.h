@@ -1,8 +1,69 @@
-//
-// Created by xinyu on 2026/6/29.
-//
+#pragma once
+#include <map>
+#include <string>
+#include <unordered_map>
+#include <muduo/base/Timestamp.h>
 
-#ifndef MUDUOHTTP_HTTPREQUEST_H
-#define MUDUOHTTP_HTTPREQUEST_H
+namespace http {  //http请求：负责解析http方法、头部和主体内容
+    class HttpRequest {
+    public:
+        //围绕成员变量构造成员函数
+        enum Method {
+            kInvalid, kGet, kHead, kPost, kPut, kDelete, kOptions
+        };
 
-#endif //MUDUOHTTP_HTTPREQUEST_H
+        HttpRequest() : method_(kInvalid), version_("Unknown") {}
+
+        void setReceiveTime(muduo::Timestamp t);
+        muduo::Timestamp receiveTime() const { return receiveTime_; }
+
+        bool setMethod(const char* start, const char* end);  //设置http方法，GET POST等
+        Method method() const { return method_; }
+
+        void setPath(const char* start, const char* end);
+        std::string path() const { return path_; }
+
+        void setPathParameters(const std::string& key, const std::string& value);
+        std::string getPathParameters(const std::string& key) const;
+
+        void setQueryParameters(const char* start, const char* end);
+        std::string getQueryParameters(const std::string& key) const;
+
+        void setVersion(std::string v) {
+            version_ = v;
+        }
+        std::string getVersion() const {
+            return version_;
+        }
+
+        void addHeader(const char* start, const char* colon, const char* end); //像请求中添加头部
+        std::string getHeader(const std::string& field) const;
+
+        const std::map<std::string, std::string>& headers() const { return headers_; }
+
+        void setBody(const std::string& body) { content_ = body; }
+        void setBody(const char* start, const char* end) {  //设置主体内容
+            if (end >= start) {
+                content_.assign(start, end - start);
+            }
+        }
+        std::string getBody() const { return content_; }
+
+        void setContentLength(uint64_t length) { contentLength_ = length; }
+        uint64_t contentLength() const { return contentLength_; }
+
+        void swap(HttpRequest& that);
+
+    private:
+        Method                                       method_; //请求方法
+        std::string                                  version_; //http版本
+        std::string                                  path_; //请求路径
+        std::unordered_map<std::string, std::string> pathParameters_; //路径参数
+        std::unordered_map<std::string, std::string> queryParameters_;//查询参数
+        muduo::Timestamp                             receiveTime_;    //接收时间
+        //请求头、请求体和请求长度
+        std::map<std::string, std::string>  headers_;
+        std::string                         content_;
+        uint64_t                            contentLength_ { 0 };
+    };
+}
