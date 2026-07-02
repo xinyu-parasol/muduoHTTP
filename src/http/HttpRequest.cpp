@@ -1,6 +1,5 @@
 #include "../../include/http/HttpRequest.h"
 
-#include <bits/locale_facets_nonio.h>
 //http请求：负责解析http方法、头部和主体内容
 
 namespace http {
@@ -55,9 +54,9 @@ namespace http {
         std::string::size_type pos = 0;
         std::string::size_type prev = 0;
         //按照 & 分割多个参数
-        while ((pos = argumentStr.find("&", prev)) != std::string::npos) {
+        while ((pos = argumentStr.find('&', prev)) != std::string::npos) {
             std::string pair = argumentStr.substr(prev, pos - prev);
-            std::string::size_type equalPos = pair.find("=");
+            std::string::size_type equalPos = pair.find('=');
 
             if (equalPos != std::string::npos) {
                 std::string key = pair.substr(0, equalPos);
@@ -68,7 +67,7 @@ namespace http {
         }
         //处理最后一个参数
         std::string lastPair = argumentStr.substr(prev);
-        std::string::size_type equalPos = lastPair.find("=");
+        std::string::size_type equalPos = lastPair.find('=');
         if (equalPos != std::string::npos) {
             std::string key = lastPair.substr(0, equalPos);
             std::string value = lastPair.substr(equalPos + 1);

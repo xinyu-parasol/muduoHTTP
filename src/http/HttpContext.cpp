@@ -38,7 +38,7 @@ namespace http {
                         if (request_.method() == HttpRequest::kPost ||
                             request_.method() == HttpRequest::kPut) {
                             std::string contentLength = request_.getHeader("Content-Length");
-                            if (contentLength.empty()) {
+                            if (!contentLength.empty()) {
                                 request_.setContentLength(std::stoi(contentLength));
                                 if (request_.contentLength() > 0) {
                                     state_ =  kExpectBody;

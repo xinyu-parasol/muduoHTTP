@@ -6,24 +6,45 @@
 #include <muduo/net/TcpServer.h>
 
 #include "../router/Router.h"
+#include "../http/HttpRequest.h"
+#include "../http/HttpResponse.h"
+#include "../http/HttpContext.h"
+
 class HttpRequest;
 class HttpResponse;
 
 namespace http {
+    using HttpCallback = std::function<void(const HttpRequest&, HttpResponse*)>;
+
     class HttpServer : muduo::noncopyable {
     public:
-        using HttpCallback = std::function<void(const HttpRequest&, HttpResponse*)>;
+        HttpServer(muduo::net::EventLoop* loop,
+                    const muduo::net::InetAddress& listenAddr,
+                    const std::string& name = "HttpServer");
+        ~HttpServer() = default;
 
-        //构造函数
-        HttpServer(int port,
-                    const std::string& name,
-                    bool useSSL = false,
-                    muduo::net::TcpServer::Option option = muduo::net::TcpServer::kNoReusePort);
+        // 设置业务回调（优先级低于路由器，当路由器未匹配时调用）
+        void setHttpCallback(const HttpCallback& cb) { httpCallback_ = cb; }
+
+        // 设置路由器（也可以直接在构造函数中传入）
+        void setRouter(const router::Router& router) { router_ = router; }
+        router::Router& router() { return router_; }
+
+        void start();
     private:
-        muduo::net::InetAddress   listenAddr_;
-        muduo::net::TcpServer     server_;
-        muduo::net::EventLoop     mainloop_;
-        HttpCallback              httpCallback_;
-        Router                    router_;
+        // 网络回调
+        void onConnection(const muduo::net::TcpConnectionPtr& conn);
+        void onMessage(const muduo::net::TcpConnectionPtr& conn,
+                       muduo::net::Buffer* buf,
+                       muduo::Timestamp receiveTime);
+
+        // 处理完整请求（内部函数）
+        void onRequest(const muduo::net::TcpConnectionPtr& conn,
+                       const HttpRequest& req,
+                       HttpResponse* resp);
+
+        muduo::net::TcpServer server_;
+        router::Router router_;
+        HttpCallback httpCallback_;
     };
 }

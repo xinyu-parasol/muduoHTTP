@@ -5,7 +5,7 @@
 namespace http
 {
     namespace router
-    {
+    {   //将http请求（方法+路径）映射到对应的业务处理逻辑，在注册阶段建立映射表
         void Router::registerHandler(HttpRequest::Method method, const std::string &path, HandlerPtr handler) {
             RouteKey key{method, path};
             handlers_[key] = std::move(handler);
@@ -60,7 +60,7 @@ namespace http
                     HttpRequest newReq(req);
                     extractPathParameters(match, newReq);
 
-                    callback(req, resp);
+                    callback(newReq, resp);
                     return true;
                 }
             }

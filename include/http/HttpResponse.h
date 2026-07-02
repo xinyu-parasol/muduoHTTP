@@ -18,11 +18,12 @@ namespace http {
             k500InternalServerError = 500,
         };
 
-        HttpResponse(bool close = true) : statusCode_(kUnknown), closeConnection_(close) {}
+        HttpResponse(bool close = true) : httpVersion_("HTTP/1.1"), statusCode_(kUnknown), closeConnection_(close) {}
 
         void setVersion(std::string version) { httpVersion_ = version; }
 
-        void setStatusCode(HttpStatusCode code) { statusCode_ = code; }
+        void setStatusCode(HttpStatusCode code) { statusCode_ = code; setDefaultStatusMessage(); }
+        void setDefaultStatusMessage();
         HttpStatusCode getStatusCode() const { return statusCode_; }
 
         void setStatusMessage(const std::string message) { statusMessage_ = message; }

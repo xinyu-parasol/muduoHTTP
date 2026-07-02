@@ -9,6 +9,7 @@ namespace http {
         snprintf(buf, sizeof(buf), "%s %d", httpVersion_.c_str(), statusCode_);
 
         outputBuf->append(buf);
+        outputBuf->append(" ");
         outputBuf->append(statusMessage_);
         outputBuf->append("\r\n");
 
@@ -24,8 +25,30 @@ namespace http {
             outputBuf->append(header.second);
             outputBuf->append("\r\n");
         }
+        if (!body_.empty()) {
+            char len[32];
+            snprintf(len, sizeof(len), "%zu", body_.size());
+            outputBuf->append("Content-Length: ");
+            outputBuf->append(len);
+            outputBuf->append("\r\n");
+        }
         outputBuf->append("\r\n");
         outputBuf->append(body_);
+    }
+
+    void HttpResponse::setDefaultStatusMessage() {
+        switch (statusCode_) {
+            case k200Ok: statusMessage_ = "OK"; break;
+            case k204NoContent: statusMessage_ = "No Content"; break;
+            case k301MovedPermanently: statusMessage_ = "Moved Permanently"; break;
+            case k400BadRequest: statusMessage_ = "Bad Request"; break;
+            case k401Unauthorized: statusMessage_ = "Unauthorized"; break;
+            case k403Forbidden: statusMessage_ = "Forbidden"; break;
+            case k404NotFound: statusMessage_ = "Not Found"; break;
+            case k409Conflict: statusMessage_ = "Conflict"; break;
+            case k500InternalServerError: statusMessage_ = "Internal Server Error"; break;
+            default: statusMessage_ = ""; break;
+        }
     }
 
     void HttpResponse::setStatusLine(const std::string &version,
