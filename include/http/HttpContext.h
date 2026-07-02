@@ -1,6 +1,5 @@
 #pragma once
 #include <muduo/net/Buffer.h>
-#include <muduo/net/http/HttpRequest.h>
 
 #include "HttpRequest.h"
 //解析报文，存储到HttpContext中

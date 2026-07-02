@@ -20,6 +20,10 @@ set(SOURCES
         src/http/HttpContext.cpp
         src/http/HttpServer.cpp
         src/router/Router.cpp
+        src/session/Session.cpp
+        src/session/SessionManager.cpp
+        src/session/SessionStorage.cpp
+        src/middleware/MiddleChain.cpp
 )
 
 add_executable(muduoHTTP ${SOURCES})
